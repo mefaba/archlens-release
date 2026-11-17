@@ -1,0 +1,286 @@
+id: happy-path
+name: Order placed successfully
+kind: happy
+default: true
+description: Valid input and a successful reservation and charge reach save(), then
+  publish(order.placed), then HTTP 201. The supplied database and broker helpers are empty, so
+  success means these source calls completed; durable persistence and event delivery are not
+  established.
+tags:
+  - success
+  - "201"
+outcome:
+  status: success
+  label: 201 Created after save() and publish() return; I/O helpers are stubs
+steps:
+  - kind: include
+    flow: checkout-start
+  - id: op-payment
+    kind: operation
+    label: Charge the order total
+    sources:
+      - checkout
+      - charge
+    from: orders
+    to: payments
+    returns:
+      label: Charge
+    description: The order ID becomes the provider Idempotency-Key. The service awaits the charge before
+      constructing and saving the order.
+    steps:
+      - id: charge-payment
+        kind: invocation
+        label: PaymentGateway.charge(request)
+        sources:
+          - checkout
+          - charge
+        from: service.place
+        to: payments.charge
+        args:
+          - name: request
+            value: "{ amount: total, paymentMethodId: input.paymentMethodId, idempotencyKey: orderId }"
+            type: ChargeRequest
+        returns:
+          label: Charge
+          type: Charge
+          payload: charge-success
+        steps:
+          - id: post-charge
+            kind: request
+            label: POST /v1/charges
+            sources:
+              - charge
+            from: payments.charge
+            to: payments
+            protocol: HTTP
+            payload: charge-request
+            returns:
+              label: Response with Charge JSON; status unspecified
+              payload: charge-success
+            description: Sends amount and payment_method, plus Idempotency-Key and redacted authorization. This
+              scenario supplies a valid successful provider response; the exact HTTP success status
+              is unknown.
+          - id: provider-decision
+            kind: branch
+            label: Provider returned HTTP 402?
+            sources:
+              - charge
+            on: payments.charge
+            detail: 4
+            condition: response.status === 402
+            description: The gateway explicitly checks only status 402. Other statuses are parsed and cast as
+              Charge; no succeeded-status validation is implemented.
+            alternatives:
+              - id: not-declined
+                label: Not 402; scenario supplies a succeeded Charge
+                condition: response.status !== 402
+                path: happy
+                taken: true
+              - id: declined
+                label: 402; read decline_code and throw
+                condition: response.status === 402
+                path: error
+                scenario: payment-declined
+          - id: parse-charge
+            kind: process
+            label: Parse response.json() as Charge
+            sources:
+              - charge
+            on: payments.charge
+            detail: 4
+            payload: charge-success
+            description: After the non-402 branch, the gateway returns the JSON body cast as Charge. The cast
+              does not validate the response at runtime.
+  - id: op-save
+    kind: operation
+    label: Call the order save path (stub)
+    sources:
+      - checkout
+      - save
+      - query-stub
+    on: orders
+    description: After payment, build an Order with status placed and call save(). SQL strings are
+      passed to query(), which is empty in the supplied code. No database write is verified.
+    returns:
+      label: save() returned; query helper is empty
+    steps:
+      - id: build-order
+        kind: process
+        label: Build Order with charge.id and status placed
+        sources:
+          - checkout
+          - order-type
+        on: service.place
+        detail: 4
+        payload: placed-order
+      - id: save-order
+        kind: invocation
+        label: OrderRepository.save(order)
+        sources:
+          - checkout
+          - save
+        from: service.place
+        to: repository.save
+        args:
+          - name: order
+            type: Order
+            payload: placed-order
+        returns:
+          label: void
+          type: void
+        steps:
+          - id: insert-order-call
+            kind: invocation
+            label: query(INSERT INTO orders ..., parameters)
+            sources:
+              - save
+              - query-stub
+            from: repository.save
+            to: repository.query
+            detail: 4
+            description: This is a helper invocation carrying SQL, not a query executed against a database.
+              Argument values shown here are source expressions.
+            args:
+              - name: _sql
+                value: INSERT INTO orders (id, customer_id, total, charge_id, status) VALUES ($1, $2, $3, $4, $5)
+                type: string
+              - name: _parameters
+                value: "[order.id, order.customerId, order.total, order.chargeId, order.status]"
+                type: Array<unknown>
+            returns:
+              label: void; no database I/O
+              type: void
+          - id: each-order-item
+            kind: loop
+            label: For each order.items entry
+            sources:
+              - save
+            on: repository.save
+            detail: 4
+            condition: for (const item of order.items)
+            description: The item loop is sequential. It calls the same empty query helper once for each input
+              item. No transaction is present in this source.
+            steps:
+              - id: insert-item-call
+                kind: invocation
+                label: query(INSERT INTO order_items ..., parameters)
+                sources:
+                  - save
+                  - query-stub
+                from: repository.save
+                to: repository.query
+                args:
+                  - name: _sql
+                    value: INSERT INTO order_items (order_id, sku, quantity, unit_price) VALUES ($1, $2, $3, $4)
+                    type: string
+                  - name: _parameters
+                    value: "[order.id, item.sku, item.quantity, item.unitPrice]"
+                    type: Array<unknown>
+                returns:
+                  label: void; no database I/O
+                  type: void
+  - id: op-publish
+    kind: operation
+    label: Invoke order.placed publication (stub)
+    sources:
+      - checkout
+      - publish
+      - send-stub
+    on: orders
+    description: The service awaits events.publish after save returns. EventBus builds the envelope and
+      calls send(), but the empty send helper does not deliver a broker message.
+    returns:
+      label: publish() returned; send helper is empty
+    steps:
+      - id: publish-order
+        kind: invocation
+        label: EventBus.publish('order.placed', payload)
+        sources:
+          - checkout
+          - publish
+        from: service.place
+        to: events.publish
+        payload: placed-event-data
+        args:
+          - name: type
+            value: order.placed
+            type: string
+          - name: payload
+            type: Record<string, unknown>
+            payload: placed-event-data
+        returns:
+          label: void
+          type: void
+        steps:
+          - id: build-event
+            kind: process
+            label: Build { type, payload, publishedAt }
+            sources:
+              - publish
+            on: events.publish
+            detail: 4
+            payload: placed-event-envelope
+            description: publishedAt is new Date().toISOString(). The domain payload has orderId, customerId and
+              total.
+          - id: send-event-stub
+            kind: invocation
+            label: EventBus.send('orders', type, message)
+            sources:
+              - publish
+              - send-stub
+            from: events.publish
+            to: events.send
+            detail: 4
+            payload: placed-event-envelope
+            args:
+              - name: _exchange
+                value: orders
+                type: string
+              - name: _routingKey
+                value: type (= order.placed)
+                type: string
+              - name: _message
+                type: unknown
+                payload: placed-event-envelope
+            returns:
+              label: void; no broker I/O
+              type: void
+            description: send() is empty. Exchange orders and routing key order.placed are arguments; no broker
+              protocol, acknowledgement or consumer is implemented.
+  - id: op-created
+    kind: operation
+    label: Answer 201 Created
+    sources:
+      - checkout
+      - controller
+      - http-entry
+    from: orders
+    to: client
+    description: OrderService returns only after save and publish resolve. The controller returns
+      orderId and total; the HTTP listener serializes that body.
+    steps:
+      - id: return-order
+        kind: return
+        label: Order (status placed)
+        sources:
+          - checkout
+        from: service.place
+        to: controller.place
+        payload: placed-order
+      - id: controller-created
+        kind: return
+        label: "HttpResult { status: 201, body: { orderId, total } }"
+        sources:
+          - controller
+        from: controller.place
+        to: http.listener
+      - id: http-created
+        kind: response
+        label: 201 Created
+        sources:
+          - controller
+          - http-entry
+        from: http.listener
+        to: client
+        protocol: HTTP
+        payload: api-created

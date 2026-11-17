@@ -1,0 +1,198 @@
+initial:
+  scenario: happy-path
+  view: architecture
+  level: 1
+  preset: execution
+layout:
+  direction: RIGHT
+presets:
+  request-with-payload:
+    do: parallel
+    actions:
+      - do: preset
+        name: data-transfer
+      - do: show-payload
+        payload: $payload
+        target: $to
+        durationMs: 1200
+  response-with-payload:
+    do: parallel
+    actions:
+      - do: preset
+        name: response-transfer
+      - do: show-payload
+        payload: $payload
+        target: $to
+        durationMs: 1200
+steps:
+  - step: post-orders
+    preset: request-with-payload
+  - step: post-charge
+    preset: request-with-payload
+  - step: http-created
+    preset: response-with-payload
+  - step: http-declined
+    preset: response-with-payload
+  - step: insert-order-call
+    scenario: happy-path
+    actions:
+      - do: preset
+        name: function-call
+      - do: show-annotation
+        target: repository.query
+        text: "Empty helper: the SQL is not executed against a database."
+  - step: build-event
+    scenario: happy-path
+    actions:
+      - do: preset
+        name: local-work
+      - do: show-payload
+        payload: placed-event-envelope
+        target: events.publish
+  - step: send-event-stub
+    scenario: happy-path
+    actions:
+      - do: preset
+        name: function-call
+      - do: show-annotation
+        target: events.send
+        text: "Empty helper: no broker delivery occurs in this source."
+tours:
+  - id: successful-checkout
+    scenario: happy-path
+    title: Follow a successful checkout
+    description: Start with the four participants, then inspect the HTTP contracts, exact calls and the
+      stubbed I/O boundary.
+    stops:
+      - id: overview
+        step: op-submit
+        level: 1
+        view: architecture
+        focus:
+          - client
+          - orders
+          - inventory
+          - payments
+        title: One checkout, four participants
+        body: A valid POST /orders reaches Acme Orders. The service reserves stock, charges, calls save and
+          publish, and returns 201. The save and broker helpers in this source are stubs.
+      - id: reservation-http
+        step: post-reservation
+        level: 2
+        view: architecture
+        focus:
+          - checkout
+          - inventory-client
+          - inventory
+        title: Reserve before charging
+        body: InventoryClient sends POST /reservations with orderId and input.items. Reservation.id is kept
+          for cleanup; expiresAt is not used by checkout.
+      - id: charge-call
+        step: charge-payment
+        level: 3
+        view: sequence
+        focus:
+          - service.place
+          - payments.charge
+          - payments
+        title: Await the payment
+        body: OrderService calls PaymentGateway.charge with total, paymentMethodId and the generated orderId
+          as idempotencyKey. The gateway sends the key as a header.
+      - id: sql-stub
+        step: insert-order-call
+        level: 4
+        view: sequence
+        focus:
+          - repository.save
+          - repository.query
+        title: Inspect the save boundary
+        body: save() supplies the exact INSERT INTO orders SQL and then loops over order_items. query() is
+          empty, so this project does not claim a durable database write.
+      - id: event-stub
+        step: send-event-stub
+        level: 4
+        view: sequence
+        focus:
+          - events.publish
+          - events.send
+        title: Inspect order.placed
+        body: publish() adds type and publishedAt around the domain payload, then awaits send(orders, type,
+          message). send() is empty; no broker or consumer is implemented.
+      - id: created
+        step: op-created
+        level: 1
+        view: architecture
+        focus:
+          - orders
+          - client
+        title: The API answers 201
+        body: After the save and publish calls resolve, the controller returns orderId and total. The HTTP
+          listener writes JSON with status 201.
+  - id: declined-checkout
+    scenario: payment-declined
+    title: Follow a declined payment
+    description: Inspect the provider error, cleanup ordering and API mapping. This scenario assumes the
+      release fetch resolves.
+    stops:
+      - id: decline-overview
+        step: op-payment
+        level: 1
+        view: architecture
+        focus:
+          - orders
+          - payments
+          - inventory
+        title: Payment fails after reservation
+        body: "The beginning is shared with success: valid input and a successful stock reservation. The
+          payment provider now answers 402."
+      - id: provider-402
+        step: post-charge
+        level: 2
+        view: sequence
+        focus:
+          - payment-gateway
+          - payments
+        title: The provider returns decline_code
+        body: PaymentGateway reads the provider 402 body. The API error response will preserve that decline
+          code as reason.
+      - id: domain-error
+        step: throw-declined
+        level: 3
+        view: sequence
+        focus:
+          - payments.charge
+          - service.place
+        title: Convert 402 to a domain error
+        body: charge() throws PaymentDeclinedError. OrderService has not reached order construction, save()
+          or publish().
+      - id: cleanup-guard
+        step: cleanup-decision
+        level: 4
+        view: sequence
+        focus:
+          - service.place
+          - inventory.release
+        title: Compensate only this error type
+        body: The catch block checks instanceof PaymentDeclinedError. It awaits release(reservation.id),
+          then rethrows. Other error types are rethrown without this release call.
+      - id: release
+        step: delete-reservation
+        level: 3
+        view: sequence
+        focus:
+          - service.place
+          - inventory.release
+          - inventory
+        title: Await DELETE on the reservation
+        body: The cleanup uses reservation.id, not orderId. release() waits for fetch but ignores the HTTP
+          response status; remote stock restoration is not observed.
+      - id: api-402
+        step: op-rejected
+        level: 1
+        view: architecture
+        focus:
+          - orders
+          - client
+        title: The API answers 402
+        body: After cleanup resolves, the error reaches the controller. It returns payment_declined and
+          reason with status 402. The save and publish paths were skipped.

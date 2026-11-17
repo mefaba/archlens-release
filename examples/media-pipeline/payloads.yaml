@@ -1,0 +1,45 @@
+payloads:
+  - id: upload-request
+    title: Create upload
+    kind: request
+    method: POST
+    url: https://api.lumen.example/uploads
+    contentType: application/json
+    illustrative: true
+    body:
+      filename: photo.heic
+      sizeBytes: 4812331
+  - id: upload-response
+    title: Signed URL
+    kind: response
+    status: 201
+    contentType: application/json
+    illustrative: true
+    body:
+      photoId: ph_01HZX4
+      uploadUrl: https://storage.lumen.example/originals/ph_01HZX4?signature=<redacted>
+      expiresInSeconds: 900
+  - id: uploaded-event
+    title: photo.uploaded
+    kind: event
+    contentType: application/json
+    sizeBytes: 148
+    illustrative: true
+    body:
+      type: photo.uploaded
+      photoId: ph_01HZX4
+      objectKey: originals/ph_01HZX4
+  - id: rendered-event
+    title: photo.rendered
+    kind: event
+    contentType: application/json
+    sizeBytes: 212
+    illustrative: true
+    body:
+      type: photo.rendered
+      photoId: ph_01HZX4
+      renditions:
+        - 256
+        - 512
+        - 1024
+        - 2048

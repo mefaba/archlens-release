@@ -1,0 +1,401 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "initial": {
+      "type": "object",
+      "properties": {
+        "scenario": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "view": {
+          "type": "string",
+          "enum": [
+            "architecture",
+            "sequence",
+            "execution"
+          ]
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "preset": {
+          "type": "string",
+          "enum": [
+            "architecture",
+            "execution",
+            "diagnostic"
+          ]
+        },
+        "expanded": {
+          "maxItems": 200,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "presets": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "maxLength": 128,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "defaults": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "enum": [
+          "request",
+          "response",
+          "invocation",
+          "return",
+          "event",
+          "exception",
+          "process",
+          "operation",
+          "branch",
+          "loop",
+          "parallel"
+        ]
+      },
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 80
+      }
+    },
+    "steps": {
+      "maxItems": 5000,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "preset": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "actions": {
+            "maxItems": 64,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/__schema0"
+            }
+          },
+          "importance": {
+            "type": "string",
+            "enum": [
+              "primary",
+              "secondary",
+              "background"
+            ]
+          },
+          "durationMs": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 60000
+          },
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "playback",
+              "selection"
+            ]
+          },
+          "step": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "scenario": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          }
+        },
+        "required": [
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "tours": {
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "scenario": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "stops": {
+            "minItems": 1,
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "step": {
+                  "type": "string",
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "body": {
+                  "type": "string",
+                  "maxLength": 8000
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 32
+                },
+                "view": {
+                  "type": "string",
+                  "enum": [
+                    "architecture",
+                    "sequence",
+                    "execution"
+                  ]
+                },
+                "focus": {
+                  "maxItems": 16,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  }
+                },
+                "pause": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "scenario",
+          "title",
+          "stops"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "theme": {
+      "type": "object",
+      "properties": {
+        "colors": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "enum": [
+              "bg",
+              "surface",
+              "surfaceRaised",
+              "border",
+              "text",
+              "textMuted",
+              "accent",
+              "edgeRequest",
+              "edgeResponse",
+              "edgeEvent",
+              "edgeInvocation",
+              "edgeReturn",
+              "edgeDependency",
+              "edgeError",
+              "stateActive",
+              "stateSuccess",
+              "stateError",
+              "stateWarning"
+            ]
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          }
+        },
+        "highlightIntensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "motionScale": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 3
+        }
+      },
+      "additionalProperties": false
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": [
+            "RIGHT",
+            "DOWN"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "semanticZoom": {
+      "type": "object",
+      "properties": {
+        "zoomInAt": {
+          "type": "number",
+          "minimum": 0.2,
+          "maximum": 4
+        },
+        "zoomOutAt": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 4
+        },
+        "settleAfterIn": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 4
+        },
+        "settleAfterOut": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 4
+        }
+      },
+      "required": [
+        "zoomInAt",
+        "zoomOutAt",
+        "settleAfterIn",
+        "settleAfterOut"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "__schema0": {
+      "type": "object",
+      "properties": {
+        "do": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "actions": {
+          "maxItems": 64,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        "ms": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60000
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "target": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "from": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "to": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "payload": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "style": {
+          "type": "string",
+          "enum": [
+            "request",
+            "response",
+            "event",
+            "invocation",
+            "return",
+            "error"
+          ]
+        },
+        "durationMs": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60000
+        },
+        "zoom": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 4
+        },
+        "fallback": {
+          "$ref": "#/$defs/__schema0"
+        }
+      },
+      "required": [
+        "do"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

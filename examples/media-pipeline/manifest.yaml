@@ -1,0 +1,36 @@
+format: archlens-project
+formatVersion: 1
+schemaVersion: 1.0.0
+id: media-pipeline
+version: 1.0.0
+title: Photo Upload Pipeline
+description: >-
+  What happens after someone uploads a photo to Lumen, a fictional photo-sharing service: direct
+  upload to object storage, then event-driven thumbnail rendering by a pool of parallel workers.
+metadata:
+  topic: Event-driven media processing
+  illustrative: true
+  tags:
+    - events
+    - queues
+    - parallelism
+defaults:
+  evidence:
+    level: inferred
+    note: Fictional example. No real system was analyzed.
+runtime:
+  minVersion: 1.0.0
+  requires:
+    - view.architecture
+    - view.sequence
+    - semantic-zoom
+    - playback
+files:
+  entities:
+    - model.yaml
+  scenarios:
+    - scenarios/upload.yaml
+    - scenarios/worker-crash.yaml
+  payloads:
+    - payloads.yaml
+  presentation: presentation.yaml

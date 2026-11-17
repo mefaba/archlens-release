@@ -1,0 +1,250 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "levels": {
+      "minItems": 1,
+      "maxItems": 32,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8000
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "system",
+              "application",
+              "service",
+              "instance",
+              "component",
+              "class",
+              "function",
+              "database",
+              "external",
+              "actor",
+              "group",
+              "decision"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "parent": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "detail": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 32
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 240
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "technology": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "tags": {
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 60
+            }
+          },
+          "signature": {
+            "type": "object",
+            "properties": {
+              "qualifiedName": {
+                "type": "string",
+                "maxLength": 300
+              },
+              "language": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "async": {
+                "type": "boolean"
+              },
+              "params": {
+                "maxItems": 40,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "type": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "description": {
+                      "type": "string",
+                      "maxLength": 600
+                    },
+                    "optional": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "returns": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "throws": {
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "attributes": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "verified",
+                  "documented",
+                  "observed",
+                  "inferred",
+                  "unknown"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "type": "string",
+                    "enum": [
+                      "verified",
+                      "documented",
+                      "observed",
+                      "inferred",
+                      "unknown"
+                    ]
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 600
+                  }
+                },
+                "required": [
+                  "level"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "sources": {
+            "maxItems": 40,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            }
+          },
+          "visual": {
+            "type": "object",
+            "properties": {
+              "component": {
+                "type": "string",
+                "maxLength": 80
+              },
+              "icon": {
+                "type": "string",
+                "maxLength": 60
+              },
+              "accent": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              "asset": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "entities"
+  ],
+  "additionalProperties": false
+}

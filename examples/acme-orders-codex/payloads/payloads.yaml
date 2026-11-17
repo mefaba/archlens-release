@@ -1,0 +1,193 @@
+payloads:
+  - id: place-request
+    title: POST /orders input
+    kind: request
+    body:
+      customerId: <redacted>
+      paymentMethodId: <redacted>
+      items: &a1
+        - sku: SKU-EXAMPLE
+          quantity: 2
+          unitPrice: 25
+    illustrative: true
+    evidence:
+      level: inferred
+      note: Handwritten example. Field shapes follow the cited source; values are symbolic or synthetic.
+        Sensitive identifiers are redacted.
+    sources:
+      - input-type
+      - http-entry
+    method: POST
+    url: /orders
+    contentType: application/json
+  - id: reserve-request
+    title: Reservation request
+    kind: request
+    body:
+      orderId: <generated orderId>
+      items: *a1
+    illustrative: true
+    evidence:
+      level: inferred
+      note: Handwritten example. Field shapes follow the cited source; values are symbolic or synthetic.
+        Sensitive identifiers are redacted.
+    sources:
+      - checkout
+      - reserve
+    method: POST
+    url: /reservations
+    contentType: application/json
+    note: input.items is passed unchanged. unitPrice is sent even though InventoryClient.reserve
+      declares only sku and quantity in its item type.
+  - id: reservation
+    title: Reservation result
+    kind: response
+    body:
+      id: <reservation ID>
+      expiresAt: <inventory expiry>
+    illustrative: true
+    evidence:
+      level: inferred
+      note: Handwritten example. Field shapes follow the cited source; values are symbolic or synthetic.
+        Sensitive identifiers are redacted.
+    sources:
+      - reservation-type
+      - reserve
+    note: The successful HTTP status is not specified by this client. expiresAt is returned but is not
+      read by OrderService.
+  - id: charge-request
+    title: Provider charge request
+    kind: request
+    body:
+      amount: 50
+      payment_method: <redacted>
+    illustrative: true
+    evidence:
+      level: inferred
+      note: Handwritten example. Field shapes follow the cited source; values are symbolic or synthetic.
+        Sensitive identifiers are redacted.
+    sources:
+      - charge
+      - checkout
+    method: POST
+    url: /v1/charges
+    contentType: application/json
+    headers:
+      Idempotency-Key: <generated orderId>
+      Authorization: <redacted>
+    note: amount is sum(quantity * unitPrice); the source specifies no currency or units. A fresh
+      randomUUID is generated for each placeOrder call, so this key alone does not establish
+      checkout retry deduplication.
+  - id: charge-success
+    title: Parsed successful charge
+    kind: response
+    body:
+      id: <charge ID>
+      status: succeeded
+    illustrative: true
+    evidence:
+      level: inferred
+      note: Handwritten example. Field shapes follow the cited source; values are symbolic or synthetic.
+        Sensitive identifiers are redacted.
+    sources:
+      - charge-type
+      - charge
+    note: Typed as Charge by the client. No successful HTTP status or runtime response validation is
+      implemented.
+  - id: placed-order
+    title: Order passed to save() and returned by the service
+    kind: record
+    body:
+      id: <generated orderId>
+      customerId: <redacted>
+      items: *a1
+      total: 50
+      chargeId: <charge ID>
+      status: placed
+    illustrative: true
+    evidence:
+      level: inferred
+      note: Handwritten example. Field shapes follow the cited source; values are symbolic or synthetic.
+        Sensitive identifiers are redacted.
+    sources:
+      - order-type
+      - checkout
+  - id: placed-event-data
+    title: Arguments to order.placed publication
+    kind: event
+    body: &a2
+      orderId: <generated orderId>
+      customerId: <redacted>
+      total: 50
+    illustrative: true
+    evidence:
+      level: inferred
+      note: Handwritten example. Field shapes follow the cited source; values are symbolic or synthetic.
+        Sensitive identifiers are redacted.
+    sources:
+      - checkout
+    note: The domain payload contains only orderId, customerId and total.
+  - id: placed-event-envelope
+    title: Envelope passed to the empty send() helper
+    kind: event
+    body:
+      type: order.placed
+      payload: *a2
+      publishedAt: <generated ISO timestamp>
+    illustrative: true
+    evidence:
+      level: inferred
+      note: Handwritten example. Field shapes follow the cited source; values are symbolic or synthetic.
+        Sensitive identifiers are redacted.
+    sources:
+      - publish
+      - send-stub
+    note: Passed to send(orders, order.placed, message). No actual broker publication or delivery is
+      implemented.
+  - id: api-created
+    title: API success response
+    kind: response
+    body:
+      orderId: <generated orderId>
+      total: 50
+    illustrative: true
+    evidence:
+      level: inferred
+      note: Handwritten example. Field shapes follow the cited source; values are symbolic or synthetic.
+        Sensitive identifiers are redacted.
+    sources:
+      - controller
+      - http-entry
+    status: 201
+    contentType: application/json
+  - id: provider-declined
+    title: Provider HTTP 402 response
+    kind: response
+    body:
+      decline_code: <provider decline code>
+    illustrative: true
+    evidence:
+      level: inferred
+      note: Handwritten example. Field shapes follow the cited source; values are symbolic or synthetic.
+        Sensitive identifiers are redacted.
+    sources:
+      - charge
+    status: 402
+    note: The gateway reads decline_code and uses it as PaymentDeclinedError.reason. The actual code
+      value is unknown.
+  - id: api-declined
+    title: API declined-payment response
+    kind: response
+    body:
+      error: payment_declined
+      reason: <provider decline code>
+    illustrative: true
+    evidence:
+      level: inferred
+      note: Handwritten example. Field shapes follow the cited source; values are symbolic or synthetic.
+        Sensitive identifiers are redacted.
+    sources:
+      - controller
+      - payment-error
+    status: 402
+    contentType: application/json

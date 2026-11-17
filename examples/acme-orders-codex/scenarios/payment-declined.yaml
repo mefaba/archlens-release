@@ -1,0 +1,198 @@
+id: payment-declined
+name: Payment declined; release stock and answer 402
+kind: error
+description: Valid input and successful reservation are followed by provider HTTP 402.
+  PaymentGateway throws PaymentDeclinedError; OrderService awaits release(reservation.id), rethrows,
+  and the controller answers 402. Assumes release fetch resolves; the remote release response is
+  unchecked. Save and publish are not reached.
+tags:
+  - payment-declined
+  - compensation
+  - "402"
+outcome:
+  status: failure
+  label: 402 payment_declined after awaited release(); save and publish skipped
+steps:
+  - kind: include
+    flow: checkout-start
+  - id: op-payment
+    kind: operation
+    label: Payment is declined
+    sources:
+      - checkout
+      - charge
+      - payment-error
+    from: orders
+    to: payments
+    status: error
+    description: The provider answers HTTP 402. The gateway reads decline_code and throws
+      PaymentDeclinedError; checkout has not reached the save or publish calls.
+    steps:
+      - id: charge-payment
+        kind: invocation
+        label: PaymentGateway.charge(request)
+        sources:
+          - checkout
+          - charge
+        from: service.place
+        to: payments.charge
+        args:
+          - name: request
+            value: "{ amount: total, paymentMethodId: input.paymentMethodId, idempotencyKey: orderId }"
+            type: ChargeRequest
+        steps:
+          - id: post-charge
+            kind: request
+            label: POST /v1/charges
+            sources:
+              - charge
+            from: payments.charge
+            to: payments
+            protocol: HTTP
+            payload: charge-request
+            returns:
+              label: 402 with decline_code
+              payload: provider-declined
+              status: error
+          - id: provider-decision
+            kind: branch
+            label: Provider returned HTTP 402?
+            sources:
+              - charge
+            on: payments.charge
+            detail: 4
+            condition: response.status === 402
+            status: error
+            description: The gateway explicitly checks only status 402. Other statuses are parsed and cast as
+              Charge; no succeeded-status validation is implemented.
+            alternatives:
+              - id: not-declined
+                label: Not 402; scenario supplies a succeeded Charge
+                condition: response.status !== 402
+                path: happy
+                scenario: happy-path
+              - id: declined
+                label: 402; read decline_code and throw
+                condition: response.status === 402
+                path: error
+                taken: true
+          - id: throw-declined
+            kind: exception
+            label: throw new PaymentDeclinedError(decline_code)
+            sources:
+              - charge
+              - payment-error
+            from: payments.charge
+            to: service.place
+            status: error
+            description: The gateway converts the provider decline into a domain error. Its reason property is
+              the provider decline_code.
+  - id: op-release
+    kind: operation
+    label: Release the stock reservation
+    sources:
+      - compensation
+      - release
+    from: orders
+    to: inventory
+    description: On PaymentDeclinedError, OrderService awaits release(reservation.id) before rethrowing.
+      This scenario assumes fetch resolves. The client does not check the DELETE response status,
+      and remote stock state is not observed.
+    returns:
+      label: release() resolved; HTTP status unchecked
+    steps:
+      - id: cleanup-decision
+        kind: branch
+        label: Is the caught error PaymentDeclinedError?
+        sources:
+          - compensation
+        on: service.place
+        detail: 4
+        condition: error instanceof PaymentDeclinedError
+        alternatives:
+          - id: decline-error
+            label: "Yes: await release"
+            taken: true
+          - id: other-error
+            label: "Other error: rethrow without release"
+      - id: release-reservation
+        kind: invocation
+        label: InventoryClient.release(reservation.id)
+        sources:
+          - compensation
+          - release
+        from: service.place
+        to: inventory.release
+        args:
+          - name: reservationId
+            value: reservation.id
+            type: string
+        returns:
+          label: void
+          type: void
+        steps:
+          - id: delete-reservation
+            kind: request
+            label: DELETE /reservations/{reservation.id}
+            sources:
+              - release
+            from: inventory.release
+            to: inventory
+            protocol: HTTP
+            returns:
+              label: fetch resolved; response status unchecked
+            description: Uses the reservation ID returned by reserve(), not orderId. release() ignores the
+              Response and its status. No specific success status can be confirmed.
+  - id: op-rejected
+    kind: operation
+    label: Answer 402 payment_declined
+    sources:
+      - compensation
+      - controller
+      - http-entry
+    from: orders
+    to: client
+    status: error
+    description: After release resolves, the original error reaches the controller. It maps
+      PaymentDeclinedError to 402 and preserves error.reason. Neither save() nor publish() was
+      called.
+    steps:
+      - id: rethrow-declined
+        kind: exception
+        label: Rethrow the original PaymentDeclinedError
+        sources:
+          - compensation
+          - checkout
+        from: service.place
+        to: controller.place
+        status: error
+        description: Cleanup finishes before throw error. The statements that build, save and publish the
+          order were skipped because charge() threw.
+      - id: map-decline
+        kind: process
+        label: Map PaymentDeclinedError to HttpResult 402
+        sources:
+          - controller
+        on: controller.place
+        detail: 4
+        payload: api-declined
+        description: "The result body is { error: payment_declined, reason: error.reason }."
+      - id: controller-declined
+        kind: return
+        label: "HttpResult { status: 402, body: { error, reason } }"
+        sources:
+          - controller
+        from: controller.place
+        to: http.listener
+        status: error
+      - id: http-declined
+        kind: response
+        label: 402 payment_declined
+        sources:
+          - controller
+          - http-entry
+        from: http.listener
+        to: client
+        protocol: HTTP
+        payload: api-declined
+        status: error

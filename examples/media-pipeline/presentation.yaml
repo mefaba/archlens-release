@@ -1,0 +1,37 @@
+initial:
+  scenario: upload
+  view: architecture
+  level: 2
+  preset: architecture
+layout:
+  direction: RIGHT
+# A project may tune shared theme tokens with validated values, but never with free-form CSS.
+theme:
+  colors:
+    accent: '#f5b454'
+tours:
+  - id: fan-out
+    scenario: upload
+    title: Watch the fan-out
+    stops:
+      - id: direct-upload
+        step: put-object
+        level: 2
+        title: Straight to storage
+        body: The photo goes directly to the object store. The API only signs the URL.
+        pause: true
+      - id: event
+        step: publish-uploaded
+        level: 2
+        title: An event starts the rest
+        body: Storage announces the upload. From here on, nothing waits for anything else.
+        pause: true
+      - id: parallel-workers
+        step: render-small
+        level: 3
+        title: Workers in parallel
+        body: Each worker renders its own sizes at the same time. Playback keeps both lanes in step.
+        focus:
+          - worker-a
+          - worker-b
+        pause: true

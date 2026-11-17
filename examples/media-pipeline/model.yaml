@@ -1,0 +1,150 @@
+# This project defines its own three levels instead of the default five, because that is all the
+# topic needs. Levels are data, not something the framework hardcodes.
+levels:
+  - id: platform
+    name: Platform
+    description: The creator, the platform and the CDN.
+  - id: services
+    name: Services
+    description: The services and stores involved, and how events connect them.
+  - id: workers
+    name: Workers
+    description: Individual workers and the functions they run.
+entities:
+  - id: creator
+    type: actor
+    name: Creator
+    detail: 1
+    summary: Uploads a photo from the mobile app
+  - id: lumen
+    type: system
+    name: Lumen
+    detail: 1
+    summary: A fictional photo-sharing platform
+  - id: upload-api
+    type: service
+    name: Upload API
+    parent: lumen
+    detail: 2
+    summary: Hands out signed upload URLs
+    technology: Go
+  - id: object-store
+    type: database
+    name: Object Store
+    parent: lumen
+    detail: 2
+    summary: Originals and renditions
+    technology: S3-compatible storage
+    visual:
+      icon: hard-drive
+  - id: event-bus
+    type: component
+    name: Event Bus
+    parent: lumen
+    detail: 2
+    summary: Durable topics between services
+    technology: Kafka
+    visual:
+      icon: radio
+      accent: '#f5b454'
+  - id: render-service
+    type: service
+    name: Render Service
+    parent: lumen
+    detail: 2
+    summary: A pool of workers that render thumbnails
+    technology: Rust
+  - id: worker-a
+    type: instance
+    name: worker-a
+    parent: render-service
+    detail: 3
+    summary: Renders small sizes
+    attributes:
+      partition: 0
+  - id: worker-a.consume
+    type: function
+    name: consume()
+    parent: worker-a
+    detail: 3
+    summary: Takes the next event from its partition
+    signature:
+      qualifiedName: lumen::render::consume
+      language: Rust
+      params:
+        - name: event
+          type: PhotoUploaded
+      returns: Result<()>
+  - id: worker-a.render
+    type: function
+    name: render_thumbnail()
+    parent: worker-a
+    detail: 3
+    summary: Decodes the original and writes one size
+    signature:
+      qualifiedName: lumen::render::render_thumbnail
+      language: Rust
+      params:
+        - name: source
+          type: ObjectKey
+        - name: width
+          type: u32
+      returns: Result<ObjectKey>
+  - id: worker-b
+    type: instance
+    name: worker-b
+    parent: render-service
+    detail: 3
+    summary: Renders large sizes
+    attributes:
+      partition: 1
+  - id: worker-b.consume
+    type: function
+    name: consume()
+    parent: worker-b
+    detail: 3
+    summary: Takes the next event from its partition
+    signature:
+      qualifiedName: lumen::render::consume
+      language: Rust
+      params:
+        - name: event
+          type: PhotoUploaded
+      returns: Result<()>
+  - id: worker-b.render
+    type: function
+    name: render_thumbnail()
+    parent: worker-b
+    detail: 3
+    summary: Decodes the original and writes one size
+    signature:
+      qualifiedName: lumen::render::render_thumbnail
+      language: Rust
+      params:
+        - name: source
+          type: ObjectKey
+        - name: width
+          type: u32
+      returns: Result<ObjectKey>
+  - id: catalog
+    type: database
+    name: Photo Catalog
+    parent: lumen
+    detail: 2
+    summary: Photo metadata and rendition URLs
+    technology: PostgreSQL
+  - id: dead-letters
+    type: database
+    name: Dead Letter Queue
+    parent: lumen
+    detail: 2
+    summary: Events that failed too many times
+    visual:
+      icon: mail
+  - id: cdn
+    type: external
+    name: CDN
+    detail: 1
+    summary: Serves renditions worldwide
+    visual:
+      icon: globe

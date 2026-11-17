@@ -1,0 +1,323 @@
+levels:
+  - id: overview
+    name: Checkout overview
+    description: The client, Orders, inventory and payment; the checkout outcome in a few steps.
+  - id: components
+    name: Components and HTTP
+    description: The controller, orchestrator and adapters; HTTP contracts at service boundaries.
+  - id: functions
+    name: Function calls
+    description: Exact checkout calls, their returns and error propagation.
+  - id: details
+    name: Data and decisions
+    description: Validation, totals, arguments, SQL calls, the event envelope and empty helpers.
+entities:
+  - id: client
+    type: actor
+    name: API client
+    detail: 1
+    summary: Submits an order and receives the HTTP result
+    evidence:
+      level: inferred
+      note: Caller abstraction for the POST /orders interface. No client implementation is supplied.
+    visual:
+      icon: user
+  - id: orders
+    type: application
+    name: Acme Orders
+    detail: 1
+    sources:
+      - server-wiring
+      - http-entry
+      - checkout
+    technology: TypeScript / Node.js
+    summary: Reserve stock, charge, save, publish, answer
+    description: The source constructs one OrderService and an HTTP listener on port 3000. This is a
+      code structure, not a deployed instance map. OrderRepository.query and EventBus.send are empty
+      helpers.
+    visual:
+      icon: package
+      accent: "#4c8dff"
+  - id: inventory
+    type: service
+    name: Inventory service
+    detail: 1
+    sources:
+      - reserve
+      - release
+    summary: Remote reservation HTTP API
+    description: Only the caller implementation is supplied. POST /reservations returns a Reservation;
+      DELETE /reservations/{id} is used for cleanup. The remote stock implementation is unknown.
+    visual:
+      icon: boxes
+      accent: "#54b69d"
+  - id: payments
+    type: external
+    name: Payment provider
+    detail: 1
+    sources:
+      - charge
+    summary: Remote charge HTTP API
+    description: Only PaymentGateway is supplied. It maps provider HTTP 402 to PaymentDeclinedError.
+      Provider internals and successful response status are not established.
+    visual:
+      icon: shield
+      accent: "#b28ce8"
+  - id: http
+    type: component
+    name: HTTP entry and controller
+    detail: 2
+    sources:
+      - http-entry
+      - controller
+    parent: orders
+    summary: Parse the request; map the result to HTTP
+  - id: checkout
+    type: class
+    name: OrderService
+    detail: 2
+    sources:
+      - checkout
+      - compensation
+    parent: orders
+    summary: Sequential checkout and decline cleanup
+  - id: inventory-client
+    type: class
+    name: InventoryClient
+    detail: 2
+    sources:
+      - reserve
+      - release
+    parent: orders
+    summary: Reserve and release over HTTP
+  - id: payment-gateway
+    type: class
+    name: PaymentGateway
+    detail: 2
+    sources:
+      - charge
+    parent: orders
+    summary: Charge with the order ID as idempotency key
+  - id: order-repository
+    type: class
+    name: OrderRepository
+    detail: 2
+    sources:
+      - save
+      - query-stub
+    parent: orders
+    summary: SQL call structure; database helper is a stub
+    visual:
+      icon: database
+      accent: "#e3ac53"
+  - id: event-bus
+    type: class
+    name: EventBus
+    detail: 2
+    sources:
+      - publish
+      - send-stub
+    parent: orders
+    summary: Event envelope; broker helper is a stub
+    visual:
+      icon: radio
+      accent: "#e3ac53"
+  - id: http.listener
+    type: function
+    name: HTTP request listener
+    detail: 3
+    sources:
+      - http-entry
+    parent: http
+    summary: Anonymous createServer callback for POST /orders
+    signature:
+      language: TypeScript
+      async: true
+      params:
+        - name: request
+        - name: response
+    description: The listener is anonymous in server.ts. It collects chunks, parses JSON, awaits
+      controller.placeOrder, then writes status and JSON body.
+  - id: controller.place
+    type: function
+    name: OrderController.placeOrder()
+    detail: 3
+    sources:
+      - controller
+    parent: http
+    signature:
+      qualifiedName: OrderController.placeOrder
+      language: TypeScript
+      async: true
+      params:
+        - name: body
+          type: unknown
+      returns: Promise<HttpResult>
+    summary: Validate input and convert domain errors to status codes
+  - id: controller.validate
+    type: function
+    name: OrderController.validate()
+    detail: 4
+    sources:
+      - validation
+    parent: http
+    signature:
+      qualifiedName: OrderController.validate
+      language: TypeScript
+      async: false
+      params:
+        - name: body
+          type: unknown
+      returns: PlaceOrderInput | undefined
+    summary: Check required top-level fields and nonempty items
+    description: Checks truthy customerId/paymentMethodId and a nonempty items array. Does not validate
+      SKU, quantity, price, payment ownership or item field types.
+  - id: service.place
+    type: function
+    name: OrderService.placeOrder()
+    detail: 3
+    sources:
+      - checkout
+      - compensation
+    parent: checkout
+    signature:
+      qualifiedName: OrderService.placeOrder
+      language: TypeScript
+      async: true
+      params:
+        - name: input
+          type: PlaceOrderInput
+      returns: Promise<Order>
+    summary: Reserve, charge, save and publish; release on decline
+  - id: inventory.reserve
+    type: function
+    name: InventoryClient.reserve()
+    detail: 3
+    sources:
+      - reserve
+    parent: inventory-client
+    signature:
+      qualifiedName: InventoryClient.reserve
+      language: TypeScript
+      async: true
+      params:
+        - name: orderId
+          type: string
+        - name: items
+          type: "Array<{ sku: string; quantity: number }>"
+      returns: Promise<Reservation>
+    summary: POST /reservations
+    description: Serializes { orderId, items } directly. The caller passes input.items, so its unitPrice
+      properties also travel in the JSON.
+  - id: inventory.release
+    type: function
+    name: InventoryClient.release()
+    detail: 3
+    sources:
+      - release
+    parent: inventory-client
+    signature:
+      qualifiedName: InventoryClient.release
+      language: TypeScript
+      async: true
+      params:
+        - name: reservationId
+          type: string
+      returns: Promise<void>
+    summary: Await DELETE /reservations/{id}
+    description: Awaits fetch completion and does not inspect the HTTP status. The diagram assumes this
+      call resolves in the requested decline scenario.
+  - id: payments.charge
+    type: function
+    name: PaymentGateway.charge()
+    detail: 3
+    sources:
+      - charge
+      - charge-type
+    parent: payment-gateway
+    signature:
+      qualifiedName: PaymentGateway.charge
+      language: TypeScript
+      async: true
+      params:
+        - name: request
+          type: ChargeRequest
+      returns: Promise<Charge>
+    summary: POST /v1/charges; 402 throws PaymentDeclinedError
+  - id: repository.save
+    type: function
+    name: OrderRepository.save()
+    detail: 3
+    sources:
+      - save
+      - query-stub
+    parent: order-repository
+    signature:
+      qualifiedName: OrderRepository.save
+      language: TypeScript
+      async: true
+      params:
+        - name: order
+          type: Order
+      returns: Promise<void>
+    summary: Call query for the order header, then each item
+  - id: repository.query
+    type: function
+    name: OrderRepository.query()
+    detail: 4
+    sources:
+      - query-stub
+    parent: order-repository
+    signature:
+      qualifiedName: OrderRepository.query
+      language: TypeScript
+      async: true
+      params:
+        - name: _sql
+          type: string
+        - name: _parameters
+          type: Array<unknown>
+      returns: Promise<void>
+    summary: "Empty helper: no database I/O"
+    description: The SQL and parameter calls exist in save(), but this private helper has no executable
+      database operation.
+  - id: events.publish
+    type: function
+    name: EventBus.publish()
+    detail: 3
+    sources:
+      - publish
+    parent: event-bus
+    signature:
+      qualifiedName: EventBus.publish
+      language: TypeScript
+      async: true
+      params:
+        - name: type
+          type: string
+        - name: payload
+          type: Record<string, unknown>
+      returns: Promise<void>
+    summary: Build { type, payload, publishedAt }; await send
+  - id: events.send
+    type: function
+    name: EventBus.send()
+    detail: 4
+    sources:
+      - send-stub
+    parent: event-bus
+    signature:
+      qualifiedName: EventBus.send
+      language: TypeScript
+      async: true
+      params:
+        - name: _exchange
+          type: string
+        - name: _routingKey
+          type: string
+        - name: _message
+          type: unknown
+      returns: Promise<void>
+    summary: "Empty helper: no broker I/O"
+    description: publish() passes exchange orders, the event type as routing key and the envelope.
+      send() does not send anything in this source.

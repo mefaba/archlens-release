@@ -1,0 +1,40 @@
+name: Bug report
+description: Something in ArchLens does not work as it should.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: ArchLens version
+      description: Press Alt to show the menu bar. It is under Help, such as 0.1.0.
+    validations:
+      required: true
+  - type: dropdown
+    id: system
+    attributes:
+      label: System
+      options:
+        - Windows
+        - Linux (AppImage)
+        - Linux (.deb)
+        - archlens.net in a browser
+    validations:
+      required: true
+  - type: input
+    id: agent
+    attributes:
+      label: Coding agent, if it is involved
+      description: Such as Codex CLI 0.166.0 or Claude Code 2.1.0.
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Press Alt, choose Help → Open Logs Folder, then attach archlens.log or paste its last lines. Remove anything private first.
+      render: text

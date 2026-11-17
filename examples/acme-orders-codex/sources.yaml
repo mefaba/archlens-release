@@ -1,0 +1,144 @@
+sources:
+  - id: server-wiring
+    kind: code
+    title: Order service dependencies are constructed
+    repository: repository
+    path: src/server.ts
+    lineStart: 9
+    lineEnd: 15
+  - id: http-entry
+    kind: code
+    title: POST /orders listener and JSON response
+    repository: repository
+    path: src/server.ts
+    lineStart: 17
+    lineEnd: 27
+  - id: controller
+    kind: symbol
+    title: Controller dispatch and HTTP result mapping
+    repository: repository
+    path: src/orders/OrderController.ts
+    lineStart: 13
+    lineEnd: 28
+    symbol: OrderController.placeOrder
+  - id: validation
+    kind: symbol
+    title: Minimal request validation
+    repository: repository
+    path: src/orders/OrderController.ts
+    lineStart: 30
+    lineEnd: 35
+    symbol: OrderController.validate
+  - id: input-type
+    kind: symbol
+    title: PlaceOrderInput fields
+    repository: repository
+    path: src/orders/OrderService.ts
+    lineStart: 8
+    lineEnd: 12
+    symbol: PlaceOrderInput
+  - id: checkout
+    kind: symbol
+    title: Reserve, charge, save, publish, return
+    repository: repository
+    path: src/orders/OrderService.ts
+    lineStart: 22
+    lineEnd: 45
+    symbol: OrderService.placeOrder
+  - id: compensation
+    kind: symbol
+    title: Release the reservation for PaymentDeclinedError, then rethrow
+    repository: repository
+    path: src/orders/OrderService.ts
+    lineStart: 46
+    lineEnd: 50
+    symbol: OrderService.placeOrder
+  - id: reservation-type
+    kind: symbol
+    title: Reservation response fields
+    repository: repository
+    path: src/inventory/InventoryClient.ts
+    lineStart: 3
+    lineEnd: 6
+    symbol: Reservation
+  - id: reserve
+    kind: symbol
+    title: POST reservations and return parsed response
+    repository: repository
+    path: src/inventory/InventoryClient.ts
+    lineStart: 13
+    lineEnd: 24
+    symbol: InventoryClient.reserve
+  - id: release
+    kind: symbol
+    title: Await DELETE reservation; response status is not checked
+    repository: repository
+    path: src/inventory/InventoryClient.ts
+    lineStart: 27
+    lineEnd: 29
+    symbol: InventoryClient.release
+  - id: charge-type
+    kind: code
+    title: ChargeRequest and Charge interfaces
+    repository: repository
+    path: src/payments/PaymentGateway.ts
+    lineStart: 3
+    lineEnd: 13
+  - id: charge
+    kind: symbol
+    title: Charge request and 402 conversion
+    repository: repository
+    path: src/payments/PaymentGateway.ts
+    lineStart: 20
+    lineEnd: 35
+    symbol: PaymentGateway.charge
+  - id: order-type
+    kind: symbol
+    title: Order record fields
+    repository: repository
+    path: src/orders/OrderRepository.ts
+    lineStart: 1
+    lineEnd: 8
+    symbol: Order
+  - id: save
+    kind: symbol
+    title: Order header and item SQL calls
+    repository: repository
+    path: src/orders/OrderRepository.ts
+    lineStart: 12
+    lineEnd: 23
+    symbol: OrderRepository.save
+  - id: query-stub
+    kind: symbol
+    title: Database query helper is empty
+    repository: repository
+    path: src/orders/OrderRepository.ts
+    lineStart: 25
+    lineEnd: 27
+    symbol: OrderRepository.query
+    note: SQL strings are passed to this helper, but no database client executes them.
+  - id: publish
+    kind: symbol
+    title: Build event envelope and await send
+    repository: repository
+    path: src/events/EventBus.ts
+    lineStart: 3
+    lineEnd: 6
+    symbol: EventBus.publish
+  - id: send-stub
+    kind: symbol
+    title: Broker send helper is empty
+    repository: repository
+    path: src/events/EventBus.ts
+    lineStart: 8
+    lineEnd: 10
+    symbol: EventBus.send
+    note: No broker client, protocol, delivery or consumer is implemented here.
+  - id: payment-error
+    kind: symbol
+    title: PaymentDeclinedError retains its reason
+    repository: repository
+    path: src/errors.ts
+    lineStart: 1
+    lineEnd: 5
+    symbol: PaymentDeclinedError

@@ -1,0 +1,2599 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "format": {
+      "type": "string",
+      "const": "archlens-document"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "id": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 8000
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "authors": {
+          "maxItems": 50,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 120
+          }
+        },
+        "tags": {
+          "maxItems": 50,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 60
+          }
+        },
+        "topic": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "license": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "illustrative": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 8000
+        },
+        "attributes": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "defaults": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "verified",
+                "documented",
+                "observed",
+                "inferred",
+                "unknown"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "level": {
+                  "type": "string",
+                  "enum": [
+                    "verified",
+                    "documented",
+                    "observed",
+                    "inferred",
+                    "unknown"
+                  ]
+                },
+                "note": {
+                  "type": "string",
+                  "maxLength": 600
+                }
+              },
+              "required": [
+                "level"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "levels": {
+      "minItems": 1,
+      "maxItems": 32,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8000
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "code",
+              "commit",
+              "symbol",
+              "doc",
+              "api-spec",
+              "trace",
+              "url"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "repository": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "path": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "lineStart": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "lineEnd": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "commit": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "symbol": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "section": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "traceId": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "spanId": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 2048,
+            "pattern": "^https?:\\/\\/[^\\s]+$"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 8000
+          }
+        },
+        "required": [
+          "id",
+          "kind"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "entities": {
+      "minItems": 1,
+      "maxItems": 100000,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "system",
+              "application",
+              "service",
+              "instance",
+              "component",
+              "class",
+              "function",
+              "database",
+              "external",
+              "actor",
+              "group",
+              "decision"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "parent": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "detail": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 32
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 240
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "technology": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "tags": {
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 60
+            }
+          },
+          "signature": {
+            "type": "object",
+            "properties": {
+              "qualifiedName": {
+                "type": "string",
+                "maxLength": 300
+              },
+              "language": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "async": {
+                "type": "boolean"
+              },
+              "params": {
+                "maxItems": 40,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "type": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "description": {
+                      "type": "string",
+                      "maxLength": 600
+                    },
+                    "optional": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "returns": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "throws": {
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "attributes": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "verified",
+                  "documented",
+                  "observed",
+                  "inferred",
+                  "unknown"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "type": "string",
+                    "enum": [
+                      "verified",
+                      "documented",
+                      "observed",
+                      "inferred",
+                      "unknown"
+                    ]
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 600
+                  }
+                },
+                "required": [
+                  "level"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "sources": {
+            "maxItems": 40,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            }
+          },
+          "visual": {
+            "type": "object",
+            "properties": {
+              "component": {
+                "type": "string",
+                "maxLength": 80
+              },
+              "icon": {
+                "type": "string",
+                "maxLength": 60
+              },
+              "accent": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              "asset": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "relationships": {
+      "maxItems": 200000,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "communication",
+              "dependency",
+              "invocation",
+              "data-exchange",
+              "containment",
+              "event"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "to": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "protocol": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "operation": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "forward",
+              "bidirectional"
+            ]
+          },
+          "detail": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 32
+          },
+          "payload": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "verified",
+                  "documented",
+                  "observed",
+                  "inferred",
+                  "unknown"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "type": "string",
+                    "enum": [
+                      "verified",
+                      "documented",
+                      "observed",
+                      "inferred",
+                      "unknown"
+                    ]
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 600
+                  }
+                },
+                "required": [
+                  "level"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "sources": {
+            "maxItems": 40,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "from",
+          "to"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "flows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "steps": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        "required": [
+          "id",
+          "steps"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "scenarios": {
+      "maxItems": 500,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "happy",
+              "alternate",
+              "error"
+            ]
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "tags": {
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 60
+            }
+          },
+          "outcome": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "success",
+                  "failure",
+                  "partial"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "status",
+              "label"
+            ],
+            "additionalProperties": false
+          },
+          "steps": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "steps"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "payloads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "request",
+              "response",
+              "event",
+              "record",
+              "other"
+            ]
+          },
+          "contentType": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "method": {
+            "type": "string",
+            "maxLength": 16
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "headers": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "body": {
+            "$ref": "#/$defs/__schema2"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "illustrative": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "verified",
+                  "documented",
+                  "observed",
+                  "inferred",
+                  "unknown"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "type": "string",
+                    "enum": [
+                      "verified",
+                      "documented",
+                      "observed",
+                      "inferred",
+                      "unknown"
+                    ]
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 600
+                  }
+                },
+                "required": [
+                  "level"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "sources": {
+            "maxItems": 40,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            }
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "presentation": {
+      "type": "object",
+      "properties": {
+        "initial": {
+          "type": "object",
+          "properties": {
+            "scenario": {
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "view": {
+              "type": "string",
+              "enum": [
+                "architecture",
+                "sequence",
+                "execution"
+              ]
+            },
+            "level": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 32
+            },
+            "preset": {
+              "type": "string",
+              "enum": [
+                "architecture",
+                "execution",
+                "diagnostic"
+              ]
+            },
+            "expanded": {
+              "maxItems": 200,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "presets": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema1"
+          }
+        },
+        "defaults": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "enum": [
+              "request",
+              "response",
+              "invocation",
+              "return",
+              "event",
+              "exception",
+              "process",
+              "operation",
+              "branch",
+              "loop",
+              "parallel"
+            ]
+          },
+          "additionalProperties": {
+            "type": "string",
+            "maxLength": 80
+          }
+        },
+        "steps": {
+          "maxItems": 5000,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "preset": {
+                "type": "string",
+                "maxLength": 80
+              },
+              "actions": {
+                "maxItems": 64,
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema1"
+                }
+              },
+              "importance": {
+                "type": "string",
+                "enum": [
+                  "primary",
+                  "secondary",
+                  "background"
+                ]
+              },
+              "durationMs": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 60000
+              },
+              "trigger": {
+                "type": "string",
+                "enum": [
+                  "playback",
+                  "selection"
+                ]
+              },
+              "step": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "scenario": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              }
+            },
+            "required": [
+              "step"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "tours": {
+          "maxItems": 50,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "scenario": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 8000
+              },
+              "stops": {
+                "minItems": 1,
+                "maxItems": 200,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "step": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "body": {
+                      "type": "string",
+                      "maxLength": 8000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 32
+                    },
+                    "view": {
+                      "type": "string",
+                      "enum": [
+                        "architecture",
+                        "sequence",
+                        "execution"
+                      ]
+                    },
+                    "focus": {
+                      "maxItems": 16,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      }
+                    },
+                    "pause": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "step"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "scenario",
+              "title",
+              "stops"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "theme": {
+          "type": "object",
+          "properties": {
+            "colors": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string",
+                "enum": [
+                  "bg",
+                  "surface",
+                  "surfaceRaised",
+                  "border",
+                  "text",
+                  "textMuted",
+                  "accent",
+                  "edgeRequest",
+                  "edgeResponse",
+                  "edgeEvent",
+                  "edgeInvocation",
+                  "edgeReturn",
+                  "edgeDependency",
+                  "edgeError",
+                  "stateActive",
+                  "stateSuccess",
+                  "stateError",
+                  "stateWarning"
+                ]
+              },
+              "additionalProperties": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              }
+            },
+            "highlightIntensity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "motionScale": {
+              "type": "number",
+              "minimum": 0.25,
+              "maximum": 3
+            }
+          },
+          "additionalProperties": false
+        },
+        "layout": {
+          "type": "object",
+          "properties": {
+            "direction": {
+              "type": "string",
+              "enum": [
+                "RIGHT",
+                "DOWN"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "semanticZoom": {
+          "type": "object",
+          "properties": {
+            "zoomInAt": {
+              "type": "number",
+              "minimum": 0.2,
+              "maximum": 4
+            },
+            "zoomOutAt": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 4
+            },
+            "settleAfterIn": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 4
+            },
+            "settleAfterOut": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 4
+            }
+          },
+          "required": [
+            "zoomInAt",
+            "zoomOutAt",
+            "settleAfterIn",
+            "settleAfterOut"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "path": {
+            "type": "string",
+            "maxLength": 260
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "id",
+          "path"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "format",
+    "schemaVersion",
+    "id",
+    "title",
+    "entities",
+    "scenarios"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "__schema0": {
+      "maxItems": 5000,
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 8000
+              },
+              "detail": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 32
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "ok",
+                  "warning",
+                  "error"
+                ]
+              },
+              "path": {
+                "type": "string",
+                "enum": [
+                  "happy",
+                  "alternate",
+                  "error"
+                ]
+              },
+              "importance": {
+                "type": "string",
+                "enum": [
+                  "primary",
+                  "secondary",
+                  "background"
+                ]
+              },
+              "evidence": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "verified",
+                      "documented",
+                      "observed",
+                      "inferred",
+                      "unknown"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "level": {
+                        "type": "string",
+                        "enum": [
+                          "verified",
+                          "documented",
+                          "observed",
+                          "inferred",
+                          "unknown"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "maxLength": 600
+                      }
+                    },
+                    "required": [
+                      "level"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "sources": {
+                "maxItems": 40,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                }
+              },
+              "timing": {
+                "type": "object",
+                "properties": {
+                  "durationMs": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 86400000
+                  },
+                  "basis": {
+                    "type": "string",
+                    "enum": [
+                      "illustrative",
+                      "measured"
+                    ]
+                  }
+                },
+                "required": [
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              "annotation": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "present": {
+                "type": "object",
+                "properties": {
+                  "preset": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "actions": {
+                    "maxItems": 64,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema1"
+                    }
+                  },
+                  "importance": {
+                    "type": "string",
+                    "enum": [
+                      "primary",
+                      "secondary",
+                      "background"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 60000
+                  },
+                  "trigger": {
+                    "type": "string",
+                    "enum": [
+                      "playback",
+                      "selection"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "request",
+                  "response",
+                  "invocation",
+                  "return",
+                  "event",
+                  "exception"
+                ]
+              },
+              "from": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "to": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "protocol": {
+                "type": "string",
+                "maxLength": 60
+              },
+              "operation": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "sync",
+                  "async"
+                ]
+              },
+              "relationship": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "payload": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "args": {
+                "maxItems": 40,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "value": {
+                      "type": [
+                        "string",
+                        "number",
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "payload": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "returns": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "value": {
+                    "type": [
+                      "string",
+                      "number",
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "payload": {
+                    "type": "string",
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "ok",
+                      "warning",
+                      "error"
+                    ]
+                  },
+                  "detail": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 32
+                  }
+                },
+                "required": [
+                  "label"
+                ],
+                "additionalProperties": false
+              },
+              "steps": {
+                "$ref": "#/$defs/__schema0"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "kind",
+              "from",
+              "to"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 8000
+              },
+              "detail": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 32
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "ok",
+                  "warning",
+                  "error"
+                ]
+              },
+              "path": {
+                "type": "string",
+                "enum": [
+                  "happy",
+                  "alternate",
+                  "error"
+                ]
+              },
+              "importance": {
+                "type": "string",
+                "enum": [
+                  "primary",
+                  "secondary",
+                  "background"
+                ]
+              },
+              "evidence": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "verified",
+                      "documented",
+                      "observed",
+                      "inferred",
+                      "unknown"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "level": {
+                        "type": "string",
+                        "enum": [
+                          "verified",
+                          "documented",
+                          "observed",
+                          "inferred",
+                          "unknown"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "maxLength": 600
+                      }
+                    },
+                    "required": [
+                      "level"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "sources": {
+                "maxItems": 40,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                }
+              },
+              "timing": {
+                "type": "object",
+                "properties": {
+                  "durationMs": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 86400000
+                  },
+                  "basis": {
+                    "type": "string",
+                    "enum": [
+                      "illustrative",
+                      "measured"
+                    ]
+                  }
+                },
+                "required": [
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              "annotation": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "present": {
+                "type": "object",
+                "properties": {
+                  "preset": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "actions": {
+                    "maxItems": 64,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema1"
+                    }
+                  },
+                  "importance": {
+                    "type": "string",
+                    "enum": [
+                      "primary",
+                      "secondary",
+                      "background"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 60000
+                  },
+                  "trigger": {
+                    "type": "string",
+                    "enum": [
+                      "playback",
+                      "selection"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "const": "process"
+              },
+              "on": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "payload": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "kind",
+              "on"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 8000
+              },
+              "detail": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 32
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "ok",
+                  "warning",
+                  "error"
+                ]
+              },
+              "path": {
+                "type": "string",
+                "enum": [
+                  "happy",
+                  "alternate",
+                  "error"
+                ]
+              },
+              "importance": {
+                "type": "string",
+                "enum": [
+                  "primary",
+                  "secondary",
+                  "background"
+                ]
+              },
+              "evidence": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "verified",
+                      "documented",
+                      "observed",
+                      "inferred",
+                      "unknown"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "level": {
+                        "type": "string",
+                        "enum": [
+                          "verified",
+                          "documented",
+                          "observed",
+                          "inferred",
+                          "unknown"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "maxLength": 600
+                      }
+                    },
+                    "required": [
+                      "level"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "sources": {
+                "maxItems": 40,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                }
+              },
+              "timing": {
+                "type": "object",
+                "properties": {
+                  "durationMs": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 86400000
+                  },
+                  "basis": {
+                    "type": "string",
+                    "enum": [
+                      "illustrative",
+                      "measured"
+                    ]
+                  }
+                },
+                "required": [
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              "annotation": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "present": {
+                "type": "object",
+                "properties": {
+                  "preset": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "actions": {
+                    "maxItems": 64,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema1"
+                    }
+                  },
+                  "importance": {
+                    "type": "string",
+                    "enum": [
+                      "primary",
+                      "secondary",
+                      "background"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 60000
+                  },
+                  "trigger": {
+                    "type": "string",
+                    "enum": [
+                      "playback",
+                      "selection"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "const": "operation"
+              },
+              "from": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "to": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "on": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "protocol": {
+                "type": "string",
+                "maxLength": 60
+              },
+              "returns": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "value": {
+                    "type": [
+                      "string",
+                      "number",
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "payload": {
+                    "type": "string",
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "ok",
+                      "warning",
+                      "error"
+                    ]
+                  },
+                  "detail": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 32
+                  }
+                },
+                "required": [
+                  "label"
+                ],
+                "additionalProperties": false
+              },
+              "steps": {
+                "$ref": "#/$defs/__schema0"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "kind",
+              "steps"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 8000
+              },
+              "detail": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 32
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "ok",
+                  "warning",
+                  "error"
+                ]
+              },
+              "path": {
+                "type": "string",
+                "enum": [
+                  "happy",
+                  "alternate",
+                  "error"
+                ]
+              },
+              "importance": {
+                "type": "string",
+                "enum": [
+                  "primary",
+                  "secondary",
+                  "background"
+                ]
+              },
+              "evidence": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "verified",
+                      "documented",
+                      "observed",
+                      "inferred",
+                      "unknown"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "level": {
+                        "type": "string",
+                        "enum": [
+                          "verified",
+                          "documented",
+                          "observed",
+                          "inferred",
+                          "unknown"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "maxLength": 600
+                      }
+                    },
+                    "required": [
+                      "level"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "sources": {
+                "maxItems": 40,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                }
+              },
+              "timing": {
+                "type": "object",
+                "properties": {
+                  "durationMs": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 86400000
+                  },
+                  "basis": {
+                    "type": "string",
+                    "enum": [
+                      "illustrative",
+                      "measured"
+                    ]
+                  }
+                },
+                "required": [
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              "annotation": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "present": {
+                "type": "object",
+                "properties": {
+                  "preset": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "actions": {
+                    "maxItems": 64,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema1"
+                    }
+                  },
+                  "importance": {
+                    "type": "string",
+                    "enum": [
+                      "primary",
+                      "secondary",
+                      "background"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 60000
+                  },
+                  "trigger": {
+                    "type": "string",
+                    "enum": [
+                      "playback",
+                      "selection"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "const": "branch"
+              },
+              "on": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "condition": {
+                "type": "string",
+                "maxLength": 400
+              },
+              "alternatives": {
+                "minItems": 1,
+                "maxItems": 64,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "condition": {
+                      "type": "string",
+                      "maxLength": 400
+                    },
+                    "path": {
+                      "type": "string",
+                      "enum": [
+                        "happy",
+                        "alternate",
+                        "error"
+                      ]
+                    },
+                    "taken": {
+                      "type": "boolean"
+                    },
+                    "scenario": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "steps": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "kind",
+              "alternatives"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 8000
+              },
+              "detail": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 32
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "ok",
+                  "warning",
+                  "error"
+                ]
+              },
+              "path": {
+                "type": "string",
+                "enum": [
+                  "happy",
+                  "alternate",
+                  "error"
+                ]
+              },
+              "importance": {
+                "type": "string",
+                "enum": [
+                  "primary",
+                  "secondary",
+                  "background"
+                ]
+              },
+              "evidence": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "verified",
+                      "documented",
+                      "observed",
+                      "inferred",
+                      "unknown"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "level": {
+                        "type": "string",
+                        "enum": [
+                          "verified",
+                          "documented",
+                          "observed",
+                          "inferred",
+                          "unknown"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "maxLength": 600
+                      }
+                    },
+                    "required": [
+                      "level"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "sources": {
+                "maxItems": 40,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                }
+              },
+              "timing": {
+                "type": "object",
+                "properties": {
+                  "durationMs": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 86400000
+                  },
+                  "basis": {
+                    "type": "string",
+                    "enum": [
+                      "illustrative",
+                      "measured"
+                    ]
+                  }
+                },
+                "required": [
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              "annotation": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "present": {
+                "type": "object",
+                "properties": {
+                  "preset": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "actions": {
+                    "maxItems": 64,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema1"
+                    }
+                  },
+                  "importance": {
+                    "type": "string",
+                    "enum": [
+                      "primary",
+                      "secondary",
+                      "background"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 60000
+                  },
+                  "trigger": {
+                    "type": "string",
+                    "enum": [
+                      "playback",
+                      "selection"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "const": "loop"
+              },
+              "on": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "condition": {
+                "type": "string",
+                "maxLength": 400
+              },
+              "iterations": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000
+              },
+              "steps": {
+                "$ref": "#/$defs/__schema0"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "kind",
+              "steps"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 8000
+              },
+              "detail": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 32
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "ok",
+                  "warning",
+                  "error"
+                ]
+              },
+              "path": {
+                "type": "string",
+                "enum": [
+                  "happy",
+                  "alternate",
+                  "error"
+                ]
+              },
+              "importance": {
+                "type": "string",
+                "enum": [
+                  "primary",
+                  "secondary",
+                  "background"
+                ]
+              },
+              "evidence": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "verified",
+                      "documented",
+                      "observed",
+                      "inferred",
+                      "unknown"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "level": {
+                        "type": "string",
+                        "enum": [
+                          "verified",
+                          "documented",
+                          "observed",
+                          "inferred",
+                          "unknown"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "maxLength": 600
+                      }
+                    },
+                    "required": [
+                      "level"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "sources": {
+                "maxItems": 40,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                }
+              },
+              "timing": {
+                "type": "object",
+                "properties": {
+                  "durationMs": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 86400000
+                  },
+                  "basis": {
+                    "type": "string",
+                    "enum": [
+                      "illustrative",
+                      "measured"
+                    ]
+                  }
+                },
+                "required": [
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              "annotation": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "present": {
+                "type": "object",
+                "properties": {
+                  "preset": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "actions": {
+                    "maxItems": 64,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema1"
+                    }
+                  },
+                  "importance": {
+                    "type": "string",
+                    "enum": [
+                      "primary",
+                      "secondary",
+                      "background"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 60000
+                  },
+                  "trigger": {
+                    "type": "string",
+                    "enum": [
+                      "playback",
+                      "selection"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "const": "parallel"
+              },
+              "on": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "lanes": {
+                "minItems": 1,
+                "maxItems": 64,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "steps": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "steps"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "kind",
+              "lanes"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "include"
+              },
+              "flow": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              }
+            },
+            "required": [
+              "kind",
+              "flow"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "__schema1": {
+      "type": "object",
+      "properties": {
+        "do": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "actions": {
+          "maxItems": 64,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema1"
+          }
+        },
+        "ms": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60000
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "target": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "from": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "to": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "payload": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "style": {
+          "type": "string",
+          "enum": [
+            "request",
+            "response",
+            "event",
+            "invocation",
+            "return",
+            "error"
+          ]
+        },
+        "durationMs": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60000
+        },
+        "zoom": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 4
+        },
+        "fallback": {
+          "$ref": "#/$defs/__schema1"
+        }
+      },
+      "required": [
+        "do"
+      ],
+      "additionalProperties": false
+    },
+    "__schema2": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema2"
+          }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema2"
+          }
+        }
+      ]
+    }
+  }
+}

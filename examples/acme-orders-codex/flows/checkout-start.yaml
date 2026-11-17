@@ -1,0 +1,136 @@
+flows:
+  - id: checkout-start
+    name: Accept valid input and reserve stock
+    description: Shared prefix for both requested scenarios. The request is valid and inventory
+      reservation succeeds. Calls that span later operations close with explicit return, response or
+      exception messages in each scenario.
+    steps:
+      - id: op-submit
+        kind: operation
+        label: Submit an order
+        sources:
+          - http-entry
+          - controller
+          - checkout
+        from: client
+        to: orders
+        description: POST /orders is parsed as JSON, validated by the controller and passed to OrderService.
+          Both scenarios assume valid input.
+        steps:
+          - id: post-orders
+            kind: request
+            label: POST /orders
+            sources:
+              - http-entry
+            from: client
+            to: http.listener
+            protocol: HTTP
+            payload: place-request
+            description: The Node.js listener accepts exactly POST /orders. The HTTP response is sent after the
+              checkout path finishes.
+          - id: parse-body
+            kind: process
+            label: Collect request chunks and JSON.parse the body
+            sources:
+              - http-entry
+            on: http.listener
+            detail: 4
+            description: Buffer.concat(chunks).toString(utf8) is parsed before controller dispatch. Malformed
+              JSON handling is outside the requested scenarios.
+          - id: call-controller
+            kind: invocation
+            label: OrderController.placeOrder(body)
+            sources:
+              - http-entry
+            from: http.listener
+            to: controller.place
+            args:
+              - name: body
+                type: unknown
+                payload: place-request
+          - id: validate-input
+            kind: invocation
+            label: OrderController.validate(body)
+            sources:
+              - controller
+              - validation
+            from: controller.place
+            to: controller.validate
+            args:
+              - name: body
+                value: body
+                type: unknown
+            returns:
+              label: PlaceOrderInput
+              type: PlaceOrderInput
+              payload: place-request
+            description: Checks customerId, paymentMethodId and a nonempty items array. This is not full item
+              validation.
+          - id: call-service
+            kind: invocation
+            label: OrderService.placeOrder(input)
+            sources:
+              - controller
+            from: controller.place
+            to: service.place
+            args:
+              - name: input
+                type: PlaceOrderInput
+                payload: place-request
+          - id: prepare-order
+            kind: process
+            label: Generate orderId and calculate total
+            sources:
+              - checkout
+            on: service.place
+            detail: 4
+            description: orderId = randomUUID(); total = input.items.reduce((sum, item) => sum + item.quantity *
+              item.unitPrice, 0). No currency or amount units are specified.
+      - id: op-reserve
+        kind: operation
+        label: Reserve stock
+        sources:
+          - checkout
+          - reserve
+        from: orders
+        to: inventory
+        description: Inventory reservation is awaited before payment is attempted. The resulting
+          reservation.id is retained for compensation.
+        returns:
+          label: Reservation
+        steps:
+          - id: reserve-stock
+            kind: invocation
+            label: InventoryClient.reserve(orderId, input.items)
+            sources:
+              - checkout
+              - reserve
+            from: service.place
+            to: inventory.reserve
+            args:
+              - name: orderId
+                value: orderId
+                type: string
+              - name: items
+                value: input.items
+            returns:
+              label: Reservation
+              type: Reservation
+              payload: reservation
+            steps:
+              - id: post-reservation
+                kind: request
+                label: POST /reservations
+                sources:
+                  - reserve
+                from: inventory.reserve
+                to: inventory
+                protocol: HTTP
+                payload: reserve-request
+                returns:
+                  label: Parsed Reservation
+                  type: Reservation
+                  payload: reservation
+                description: JSON.stringify({ orderId, items }) sends the items unchanged, including unitPrice from
+                  the original input. The successful status code is not specified; this scenario
+                  assumes a valid Reservation response.

@@ -1,0 +1,157 @@
+id: upload
+name: Upload and render
+kind: happy
+default: true
+description: A photo goes straight to storage, and an event fans it out to the render workers.
+outcome:
+  status: success
+  label: Photo is live
+steps:
+  - id: op-upload
+    kind: operation
+    label: Upload a photo
+    from: creator
+    to: lumen
+    returns:
+      label: Upload accepted
+    steps:
+      - id: request-url
+        kind: request
+        label: POST /uploads
+        from: creator
+        to: upload-api
+        protocol: HTTPS
+        payload: upload-request
+        returns:
+          label: 201 signed URL
+          payload: upload-response
+      - id: put-object
+        kind: request
+        label: PUT photo.heic
+        description: The bytes bypass the API entirely, so uploads scale with storage rather than servers.
+        from: creator
+        to: object-store
+        protocol: HTTPS
+        returns:
+          label: 200 stored
+  - id: op-render
+    kind: operation
+    label: Render thumbnails
+    on: lumen
+    description: Everything from here on is asynchronous. The creator is already free to move on.
+    steps:
+      - id: publish-uploaded
+        kind: event
+        label: photo.uploaded
+        from: object-store
+        to: event-bus
+        protocol: Kafka
+        payload: uploaded-event
+      - id: deliver-uploaded
+        kind: event
+        label: photo.uploaded
+        description: The workers pick the event up, so the service opens to show them at work.
+        from: event-bus
+        to: render-service
+        protocol: Kafka
+        # Composed from the presentation vocabulary: no code. Seeking back before this step closes
+        # the service again, because expansion is derived from the playback position.
+        present:
+          actions:
+            - do: preset
+              name: event-broadcast
+            - do: expand-node
+              target: render-service
+            - do: focus-camera
+              target: render-service
+      - id: render-all
+        kind: parallel
+        label: Render in parallel
+        lanes:
+          - id: small
+            label: Small sizes
+            steps:
+              - id: small-sizes
+                kind: loop
+                label: Each small size
+                condition: 'for width in [256, 512]'
+                iterations: 2
+                steps:
+                  - id: render-small
+                    kind: invocation
+                    label: render_thumbnail()
+                    from: worker-a.consume
+                    to: worker-a.render
+                    args:
+                      - name: width
+                        value: 256
+                        type: u32
+                    returns:
+                      label: Ok(key)
+                  - id: store-small
+                    kind: request
+                    label: PUT 256.webp
+                    from: worker-a.render
+                    to: object-store
+                    protocol: HTTPS
+                    returns:
+                      label: 200 stored
+          - id: large
+            label: Large sizes
+            steps:
+              - id: large-sizes
+                kind: loop
+                label: Each large size
+                condition: 'for width in [1024, 2048]'
+                iterations: 2
+                steps:
+                  - id: render-large
+                    kind: invocation
+                    label: render_thumbnail()
+                    from: worker-b.consume
+                    to: worker-b.render
+                    args:
+                      - name: width
+                        value: 1024
+                        type: u32
+                    returns:
+                      label: Ok(key)
+                  - id: store-large
+                    kind: request
+                    label: PUT 1024.webp
+                    from: worker-b.render
+                    to: object-store
+                    protocol: HTTPS
+                    returns:
+                      label: 200 stored
+      - id: publish-rendered
+        kind: event
+        label: photo.rendered
+        from: render-service
+        to: event-bus
+        protocol: Kafka
+        payload: rendered-event
+  - id: op-publish
+    kind: operation
+    label: Publish
+    from: lumen
+    to: cdn
+    returns:
+      label: Available worldwide
+    steps:
+      - id: update-catalog
+        kind: request
+        label: UPDATE photos SET status = 'live'
+        from: event-bus
+        to: catalog
+        protocol: SQL
+        returns:
+          label: 1 row
+      - id: warm-cdn
+        kind: request
+        label: POST /purge
+        from: render-service
+        to: cdn
+        protocol: HTTPS
+        returns:
+          label: 202 accepted

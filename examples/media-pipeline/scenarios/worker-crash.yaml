@@ -1,0 +1,78 @@
+id: worker-crash
+name: Corrupt photo
+kind: error
+description: >-
+  A corrupt file makes rendering fail. The worker retries, then gives up and moves the event to the
+  dead letter queue instead of blocking everything behind it.
+outcome:
+  status: partial
+  label: Photo stored, renditions missing
+steps:
+  - id: op-upload
+    kind: operation
+    label: Upload a photo
+    from: creator
+    to: lumen
+    returns:
+      label: Upload accepted
+    steps:
+      - id: request-url
+        kind: request
+        label: POST /uploads
+        from: creator
+        to: upload-api
+        protocol: HTTPS
+        payload: upload-request
+        returns:
+          label: 201 signed URL
+          payload: upload-response
+      - id: put-object
+        kind: request
+        label: PUT photo.heic
+        from: creator
+        to: object-store
+        protocol: HTTPS
+        returns:
+          label: 200 stored
+  - id: op-render
+    kind: operation
+    label: Try to render
+    on: lumen
+    status: error
+    steps:
+      - id: publish-uploaded
+        kind: event
+        label: photo.uploaded
+        from: object-store
+        to: event-bus
+        protocol: Kafka
+        payload: uploaded-event
+      - id: deliver-uploaded
+        kind: event
+        label: photo.uploaded
+        from: event-bus
+        to: render-service
+        protocol: Kafka
+      - id: retries
+        kind: loop
+        label: Retry 3 times
+        condition: until success or 3 attempts
+        iterations: 3
+        steps:
+          - id: render-attempt
+            kind: invocation
+            label: render_thumbnail()
+            from: worker-a.consume
+            to: worker-a.render
+            status: warning
+            returns:
+              label: Err(CorruptImage)
+              status: warning
+      - id: dead-letter
+        kind: event
+        label: photo.uploaded (failed)
+        description: Parking the event means one bad photo cannot hold up everyone else's.
+        from: render-service
+        to: dead-letters
+        protocol: Kafka
+        status: error

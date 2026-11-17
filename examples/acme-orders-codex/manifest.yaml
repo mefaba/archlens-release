@@ -1,0 +1,51 @@
+format: archlens-project
+formatVersion: 1
+schemaVersion: 1.0.0
+id: acme-orders-codex
+version: 1.0.0
+title: Acme Orders checkout (Codex)
+description: Follow POST /orders through stock reservation, payment, the order save call and
+  order.placed publication. Compare success with payment decline, awaited stock release and HTTP
+  402. Database and broker helpers are stubs in the supplied source.
+metadata:
+  topic: Acme Orders checkout
+  illustrative: true
+  tags:
+    - checkout
+    - orders
+    - compensation
+    - TypeScript
+  notes: Source-backed call paths with illustrative, redacted payloads. No runtime traces, deployed
+    topology, database execution or broker delivery were observed.
+defaults:
+  evidence:
+    level: verified
+    note: Verified means read in the supplied repository, not executed or observed in production. Every
+      code claim cites a source; examples and the caller abstraction are marked inferred.
+runtime:
+  minVersion: 1.0.0
+  requires:
+    - view.architecture
+    - view.sequence
+    - semantic-zoom
+    - playback
+  optional:
+    - view.execution
+    - guided-tours
+files:
+  entities:
+    - model/entities.yaml
+  relationships:
+    - model/relationships.yaml
+  flows:
+    - flows/checkout-start.yaml
+  scenarios:
+    - scenarios/happy-path.yaml
+    - scenarios/payment-declined.yaml
+  payloads:
+    - payloads/payloads.yaml
+  sources:
+    - sources.yaml
+  presentation: presentation.yaml
+  docs:
+    - README.md
