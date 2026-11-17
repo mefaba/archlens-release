@@ -45,7 +45,7 @@ A job usually takes 5 to 15 minutes, and keeps running if you leave the page. Th
 
 Open **Settings → Coding agents** and choose **Connect** next to Codex or Claude Code. ArchLens adds itself to the agent's settings with the agent's own command, as `archlens-desktop`, and changes nothing else there. Start a new agent session, then ask for a visualization while working in any repository. Keep ArchLens open to follow the link the agent gives you.
 
-In Claude Code, add `mcp__archlens-desktop` to the allowed tools in `/permissions` to use ArchLens without being asked each time. **Check** tests the connection, and **Disconnect** removes it. If you move or reinstall ArchLens, choose **Connect** again.
+In Claude Code, add `mcp__archlens-desktop` to the allowed tools in `/permissions` to use ArchLens without being asked each time. Each agent shows whether it is connected. **Test connection** starts ArchLens's server the way the agent would, and **Disconnect** removes it. If you move or reinstall ArchLens, the agent shows **Needs update**: choose **Update**.
 
 ### By hand
 
@@ -92,4 +92,4 @@ The address can be a `.zip` package, a single `.yaml` document, or a folder hold
 - Made for a desktop-sized screen with a mouse or trackpad. Nodes cannot be dragged, on purpose: the layout engine places them, so a visualization looks the same for everyone.
 - Generation was tested with Codex CLI 0.166 and Claude Code 2.1. Both change often. ArchLens checks for the features it needs, and says when one is missing.
 - Jobs started from your coding agent run inside that agent's session, and stop when it ends.
-- Not built yet: automatic updates, exporting a single offline HTML file, and importing real traces such as OpenTelemetry.
+- Not built yet: exporting a single offline HTML file, and importing real traces such as OpenTelemetry.
