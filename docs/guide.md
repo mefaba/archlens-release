@@ -27,7 +27,7 @@ Source files open in Visual Studio Code, Cursor, Windsurf, Trae, Antigravity, VS
 
 ## Creating a visualization
 
-You need the [Codex CLI](https://github.com/openai/codex) or [Claude Code](https://code.claude.com/docs/en/setup), installed and signed in. ArchLens uses that sign-in, and needs no API key of its own. **Settings → Agents** shows what it found.
+You need the [Codex CLI](https://github.com/openai/codex) or [Claude Code](https://code.claude.com/docs/en/setup), installed and signed in. ArchLens uses that sign-in, and needs no API key of its own. **Settings → Providers** shows what it found.
 
 ### In the app
 
@@ -43,7 +43,9 @@ A job usually takes 5 to 15 minutes, and keeps running if you leave the page. Th
 
 ### From the coding agent you already use
 
-Open **Settings → Coding agents** and choose **Connect** next to Codex or Claude Code. ArchLens adds itself to the agent's settings with the agent's own command, as `archlens-desktop`, and changes nothing else there. Start a new agent session, then ask for a visualization while working in any repository. Keep ArchLens open to follow the link the agent gives you.
+Open **Settings → Coding agents** and choose **Connect** next to Codex or Claude Code. ArchLens adds itself to the agent's settings with the agent's own command, as `archlens-desktop`, and changes nothing else there. Start a new agent session, then ask for a visualization while working in any repository. Your agent connects to ArchLens while it runs, so the visualization is made in ArchLens, keeps going if you close the agent session, and shows on the **Create** page. ArchLens has to be running when the agent session starts: closing its window keeps it running in the notification area.
+
+To pause agents' use of ArchLens, right-click its icon in the notification area and choose **Stop MCP**, or use the switch in **Settings → Coding agents**. Their ArchLens tools refuse to work until you choose **Start MCP**. Nothing in the agents' settings changes.
 
 In Claude Code, add `mcp__archlens-desktop` to the allowed tools in `/permissions` to use ArchLens without being asked each time. Each agent shows whether it is connected. **Test connection** starts ArchLens's server the way the agent would, and **Disconnect** removes it. If you move or reinstall ArchLens, the agent shows **Needs update**: choose **Update**.
 
@@ -82,8 +84,10 @@ The address can be a `.zip` package, a single `.yaml` document, or a folder hold
 
 ## When something does not work
 
-- **An agent is not found.** Check that its command works in a new terminal, then restart ArchLens. **Settings → Agents** shows where ArchLens looked, and lets you choose the program yourself.
-- **A link from your agent does not open.** ArchLens has to be running.
+- **An agent is not found.** Check that its command works in a new terminal, then restart ArchLens. **Settings → Providers** shows where ArchLens looked, and lets you choose the program yourself.
+- **A link from your agent does not open.** ArchLens has to be running. Closing the window keeps it running, unless **Settings → Desktop app** says otherwise.
+- **Your agent has no ArchLens tools.** ArchLens has to be running when the agent session starts. Start it, then reconnect in the agent's `/mcp`, or start a new session. After updating from 0.2.0, choose **Update** next to the agent in **Settings → Coding agents** once.
+- **Your agent says ArchLens MCP is stopped.** Choose **Start MCP** from ArchLens's icon in the notification area, or in **Settings → Coding agents**.
 - **Anything else.** **Help → Open Logs Folder** has the details (press `Alt` for the menu). Please [open an issue](https://github.com/mefaba/archlens-release/issues) and attach the log.
 
 ## Limitations
@@ -91,5 +95,5 @@ The address can be a `.zip` package, a single `.yaml` document, or a folder hold
 - Windows and Linux only for now. On macOS, [archlens.net](https://archlens.net) opens and shares visualizations, but cannot create them.
 - Made for a desktop-sized screen with a mouse or trackpad. Nodes cannot be dragged, on purpose: the layout engine places them, so a visualization looks the same for everyone.
 - Generation was tested with Codex CLI 0.166 and Claude Code 2.1. Both change often. ArchLens checks for the features it needs, and says when one is missing.
-- Jobs started from your coding agent run inside that agent's session, and stop when it ends.
+- Jobs started from your coding agent run in ArchLens, and stop if you quit ArchLens before they finish.
 - Not built yet: exporting a single offline HTML file, and importing real traces such as OpenTelemetry.

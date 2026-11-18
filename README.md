@@ -48,7 +48,8 @@ Every version is on the [releases page](https://github.com/mefaba/archlens-relea
 
 - **Windows** may say "Windows protected your PC", because the installer is not signed yet. Choose **More info**, then **Run anyway**.
 - **AppImage:** make it executable with `chmod +x ArchLens-x86_64.AppImage`, then open it. On Ubuntu, the `.deb` is the safer choice.
-- **Updates:** from 0.2.0 on, ArchLens looks for new versions by itself, and asks before it downloads or installs one. Version 0.1.0 has to be replaced by hand once: download and install the new version over it.
+- **Closing the window** keeps ArchLens running in the notification area, so your coding agents can still use it. Right-click its icon to quit, or to stop MCP for them.
+- **Updates:** from 0.2.0 on, ArchLens looks for new versions by itself, and asks before it downloads or installs one. **Settings → About** checks right away. If you installed it for all users, Windows asks for administrator permission each time. Version 0.1.0 has to be replaced by hand once: download and install the new version over it.
 
 To create visualizations, install the [Codex CLI](https://github.com/openai/codex) or [Claude Code](https://code.claude.com/docs/en/setup) and sign in. ArchLens finds them by itself. Without them, you can still open, explore and share visualizations.
 
@@ -58,7 +59,7 @@ In ArchLens, open **Settings → Coding agents** and choose **Connect** next to 
 
 > Visualize how authentication works in this project using ArchLens.
 
-Your agent passes along what it has learned, and ArchLens gives it a link to the result. Keep ArchLens open to follow the link.
+Your agent passes along what it has learned, and ArchLens gives it a link to the result. Your agent connects to ArchLens while it runs, so keep ArchLens running: closing the window leaves it in the notification area.
 
 ## Share
 
