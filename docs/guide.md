@@ -27,7 +27,7 @@ Source files open in Visual Studio Code, Cursor, Windsurf, Trae, Antigravity, VS
 
 ## Creating a visualization
 
-You need the [Codex CLI](https://github.com/openai/codex) or [Claude Code](https://code.claude.com/docs/en/setup), installed and signed in. ArchLens uses that sign-in, and needs no API key of its own. **Settings → Providers** shows what it found.
+You need the [Codex CLI](https://github.com/openai/codex), [Claude Code](https://code.claude.com/docs/en/setup) or [Antigravity CLI](https://antigravity.google/docs/cli/), installed and signed in. ArchLens uses that sign-in, and needs no API key of its own. **Settings → Providers** shows what it found.
 
 ### In the app
 
@@ -39,15 +39,15 @@ You need the [Codex CLI](https://github.com/openai/codex) or [Claude Code](https
 
 A job usually takes 5 to 15 minutes, and keeps running if you leave the page. The result is checked, then opens by itself. To change it, choose **Chat with AI** in the viewer's toolbar and ask. Each change appears at once and can be undone.
 
-**Agents never get to change your code.** Each job runs in its own workspace, inside the agent's sandbox: Codex's operating-system sandbox, which ArchLens tests on your computer first, or Claude Code's restricted mode with file tools only. Repositories are compared before and after every job, and an existing visualization is never replaced without a review or a backup. One limit: Codex's sandbox restricts writing and network access, but not reading.
+**Agents never get to change your code.** Each job runs in its own workspace, inside the agent's sandbox: Codex's operating-system sandbox, which ArchLens tests on your computer first, Claude Code's restricted mode with file tools only, or Antigravity CLI's permission rules with its commands in its own sandbox. Repositories are compared before and after every job, and an existing visualization is never replaced without a review or a backup. Two limits: Codex's sandbox restricts writing and network access, but not reading, and Antigravity's web search cannot be turned off.
 
 ### From the coding agent you already use
 
-Open **Settings → Coding agents** and choose **Connect** next to Codex or Claude Code. ArchLens adds itself to the agent's settings with the agent's own command, as `archlens-desktop`, and changes nothing else there. Start a new agent session, then ask for a visualization while working in any repository. Your agent connects to ArchLens while it runs, so the visualization is made in ArchLens, keeps going if you close the agent session, and shows on the **Create** page. ArchLens has to be running when the agent session starts: closing its window keeps it running in the notification area.
+Open **Settings → Coding agents** and choose **Connect** next to Codex, Claude Code or Antigravity CLI. ArchLens adds itself to the agent's settings with the agent's own command, as `archlens-desktop`, and changes nothing else there. Start a new agent session, then ask for a visualization while working in any repository. Your agent connects to ArchLens while it runs, so the visualization is made in ArchLens, keeps going if you close the agent session, and shows on the **Create** page. ArchLens has to be running when the agent session starts: closing its window keeps it running in the notification area.
 
 To pause agents' use of ArchLens, right-click its icon in the notification area and choose **Stop MCP**, or use the switch in **Settings → Coding agents**. Their ArchLens tools refuse to work until you choose **Start MCP**. Nothing in the agents' settings changes.
 
-In Claude Code, add `mcp__archlens-desktop` to the allowed tools in `/permissions` to use ArchLens without being asked each time. Each agent shows whether it is connected. **Test connection** starts ArchLens's server the way the agent would, and **Disconnect** removes it. If you move or reinstall ArchLens, the agent shows **Needs update**: choose **Update**.
+In Claude Code, add `mcp__archlens-desktop` to the allowed tools in `/permissions` to use ArchLens without being asked each time. In Antigravity CLI, add `mcp(archlens-desktop/*)` in `/permissions`. Each agent shows whether it is connected. **Test connection** starts ArchLens's server the way the agent would, and **Disconnect** removes it. If you move or reinstall ArchLens, the agent shows **Needs update**: choose **Update**.
 
 ### By hand
 
@@ -94,6 +94,6 @@ The address can be a `.zip` package, a single `.yaml` document, or a folder hold
 
 - Windows and Linux only for now. On macOS, [archlens.net](https://archlens.net) opens and shares visualizations, but cannot create them.
 - Made for a desktop-sized screen with a mouse or trackpad. Nodes cannot be dragged, on purpose: the layout engine places them, so a visualization looks the same for everyone.
-- Generation was tested with Codex CLI 0.166 and Claude Code 2.1. Both change often. ArchLens checks for the features it needs, and says when one is missing.
+- Generation was tested with Codex CLI 0.166, Claude Code 2.1 and Antigravity CLI 1.5. They change often. ArchLens checks for the features it needs, and says when one is missing.
 - Jobs started from your coding agent run in ArchLens, and stop if you quit ArchLens before they finish.
 - Not built yet: exporting a single offline HTML file, and importing real traces such as OpenTelemetry.

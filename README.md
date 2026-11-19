@@ -24,7 +24,7 @@
 
 ArchLens turns software systems into interactive, animated visualizations. Zoom from the whole system down to one function call, then watch a request travel through it.
 
-It works with Codex and Claude Code. Ask your agent to visualize a repository, and it draws the diagram from the code.
+It works with Codex, Claude Code and Antigravity CLI. Ask your agent to visualize a repository, and it draws the diagram from the code.
 
 ## What you get
 
@@ -32,7 +32,7 @@ It works with Codex and Claude Code. Ask your agent to visualize a repository, a
 - **Watch it run.** Play a scenario step by step and follow every request, event and error in order.
 - **Three perspectives.** The same story as an architecture diagram, a sequence diagram or a list of calls.
 - **Know what is verified.** Everything says how it is known: read in the code, documented, observed, or only inferred. A source opens in your editor at the line it cites.
-- **AI does the drawing.** Codex or Claude Code reads your repositories, builds the visualization, then improves it as you chat.
+- **AI does the drawing.** Codex, Claude Code or Antigravity CLI reads your repositories, builds the visualization, then improves it as you chat.
 - **Your code stays with you.** Agents run on your computer, with the sign-in you already have. ArchLens has no account and no API key.
 - **Plain files.** A visualization is a folder of YAML. Review it in Git, share it as a `.zip`, open it in any browser.
 
@@ -52,11 +52,11 @@ Every version is on the [releases page](https://github.com/mefaba/archlens-relea
 - **Windows** installs ArchLens for you only, in one click, so it can update itself without asking for administrator permission.
 - **Updates:** ArchLens looks for new versions by itself. When it finds one, an **Update** button appears at the top of the home page: click it to download, then **Restart to update** when you are ready. **Settings → About** checks right away. If you installed version 0.3.0 or earlier for all users, uninstall it and install the new version: your visualizations and settings stay. Version 0.1.0 cannot update itself: install the new version over it.
 
-To create visualizations, install the [Codex CLI](https://github.com/openai/codex) or [Claude Code](https://code.claude.com/docs/en/setup) and sign in. ArchLens finds them by itself. Without them, you can still open, explore and share visualizations.
+To create visualizations, install the [Codex CLI](https://github.com/openai/codex), [Claude Code](https://code.claude.com/docs/en/setup) or [Antigravity CLI](https://antigravity.google/docs/cli/) and sign in. ArchLens finds them by itself. Without them, you can still open, explore and share visualizations.
 
 ## Use with your coding agent
 
-In ArchLens, open **Settings → Coding agents** and choose **Connect** next to Codex or Claude Code. Start a new agent session, then ask from any repository:
+In ArchLens, open **Settings → Coding agents** and choose **Connect** next to Codex, Claude Code or Antigravity CLI. Start a new agent session, then ask from any repository:
 
 > Visualize how authentication works in this project using ArchLens.
 

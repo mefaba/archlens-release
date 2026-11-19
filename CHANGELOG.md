@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.0
+
+- Create visualizations with **Antigravity CLI** (`agy`), Google's coding agent, as well as Codex and Claude Code, using the sign-in you already have. Each job gets settings for that session only: its terminal commands run in Antigravity's sandbox, your repositories can be read but not changed, and web pages, the browser and MCP tools are turned off. Antigravity's web search cannot be turned off.
+- **Settings → Coding agents** connects Antigravity CLI too, so it can make ArchLens visualizations from any repository you work in.
+
 ## 0.4.0
 
 - **Visualizations**, **Create**, and **Components** share the same navigation and keep Settings and the theme switch in reach. In the viewer, Settings and Components are also available from the sidebar. The desktop app supports **Back** and **Forward** from the View menu, keyboard shortcuts, and mouse side buttons.
