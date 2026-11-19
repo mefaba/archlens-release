@@ -49,7 +49,8 @@ Every version is on the [releases page](https://github.com/mefaba/archlens-relea
 - **Windows** may say "Windows protected your PC", because the installer is not signed yet. Choose **More info**, then **Run anyway**.
 - **AppImage:** make it executable with `chmod +x ArchLens-x86_64.AppImage`, then open it. On Ubuntu, the `.deb` is the safer choice.
 - **Closing the window** keeps ArchLens running in the notification area, so your coding agents can still use it. Right-click its icon to quit, or to stop MCP for them.
-- **Updates:** from 0.2.0 on, ArchLens looks for new versions by itself, and asks before it downloads or installs one. **Settings → About** checks right away. If you installed it for all users, Windows asks for administrator permission each time. Version 0.1.0 has to be replaced by hand once: download and install the new version over it.
+- **Windows** installs ArchLens for you only, in one click, so it can update itself without asking for administrator permission.
+- **Updates:** ArchLens looks for new versions by itself. When it finds one, an **Update** button appears at the top of the home page: click it to download, then **Restart to update** when you are ready. **Settings → About** checks right away. If you installed version 0.3.0 or earlier for all users, uninstall it and install the new version: your visualizations and settings stay. Version 0.1.0 cannot update itself: install the new version over it.
 
 To create visualizations, install the [Codex CLI](https://github.com/openai/codex) or [Claude Code](https://code.claude.com/docs/en/setup) and sign in. ArchLens finds them by itself. Without them, you can still open, explore and share visualizations.
 

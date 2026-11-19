@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0
+
+- **Visualizations**, **Create**, and **Components** share the same navigation and keep Settings and the theme switch in reach. In the viewer, Settings and Components are also available from the sidebar. The desktop app supports **Back** and **Forward** from the View menu, keyboard shortcuts, and mouse side buttons.
+- On phones, the diagram fills the screen and the sidebar and inspector open over it. The timeline keeps playback and speed controls within reach. The inspector has its own close button, and the Share menu stays inside the viewport.
+- On Windows, the title bar follows the app theme and shows the current page title alongside the app menu and native window controls.
+- Desktop updates show up on the home page with download progress and a **Restart to update** button. **Settings → About** shows release notes and update errors. ArchLens asks before restarting if a visualization is still being created.
+- The Windows installer now installs for the current user with one click. If you installed 0.3.0 or earlier for all users, uninstall that copy before installing 0.4.0. Your visualizations and settings are kept.
+- During development, Vite ignores generated runtime files, desktop build output, and browser test reports so they no longer trigger reloads.
+
 ## 0.3.0
 
 - Your coding agents connect to the running ArchLens, at `http://localhost:47821/mcp`, instead of each starting its own copy. A visualization they start is made in ArchLens, shows on the **Create** page, and keeps going if you close the agent session. ArchLens has to be running when the agent session starts. **After updating from 0.2.0, open Settings → Coding agents and choose Update for each agent.** Until then, they keep working as before.
